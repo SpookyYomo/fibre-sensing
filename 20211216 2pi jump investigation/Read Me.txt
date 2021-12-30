@@ -1,0 +1,4 @@
+Due to treshold definitions of of approximately 4-5 radian still get defeated by white noise creating arbitary plus/minus 2pi jumps, we aim to investigate if the occurence is severely reduced by increasing the sampling frequency.
+
+Batch 0: AOM frequency was not adjusted accordingly with the sampling frequency, irrelevant waveform files have been deleted.
+Batch 1: Mixture of tapping and no tapping with a oscillating mirror.

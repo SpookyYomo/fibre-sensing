@@ -1,0 +1,11 @@
+This folder is an attempt to determine the effect of an additional amplifier on the output signal, particular in terms of noise.
+
+Batch 1: The addition of an amplifier had resulted in the callibrated laser frequency (from before the addition of the amplifier) to have been thrown out completely.
+
+Batch 2a: (7 Dec 2021 4pm) Goal is to check if the frequency drift changes over time (where the systems are not restarted.) Optimal frequency was found to be: 80.1250448MHz
+Batch 2b: (8 Dec 2021 3pm) (Systems were not restarted) Optimal frequency was found to be: 80.1250582MHz
+
+Batch 3: An attempt to determine the noise as a consequence of the amplifier.
+Some kind of sinusoidalish pattern can be seen when the laser is in use. Fourier analysis might be required.
+
+Batch 2c: (14 Dec 2021 5pm) (?Systems not restaarted?) Mirror frequency due to potential curvyness in drift as was encountered in one case of batch 2b. Optimal frequency was found to be : 80.1250854Mhz. There does clearly appear to be some drift.

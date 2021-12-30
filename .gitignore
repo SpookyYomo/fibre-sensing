@@ -1,0 +1,25 @@
+# Ignore the following files and directories (by wildcard *)
+
+(Signals and Communication Technology) Silvia Maria Alessio (auth.) - Digital Signal Processing and Spectral Analysis for Scientists_ Concepts and Applicatio.pdf
+IQdemodFast.pdf
+keyboard-shortcuts-windows.pdf
+20210719 Initial Readings/*
+20210719 webpage/*
+20210726 FYPMaybe-Related/*
+20210726 SmarterEveryFriday Presentation/*
+20210819 Oscilliscope Reading/Reference Code/*
+20210812 Oscilliscope Matters/*
+20210816 ActiveDSO Oscilliscope Control/*
+20211007 Presentation 1/*
+20211103 Oscilliscope Trigger/*
+20211206 SciHub readings/*
+20220114 Smarter Every Friday Presentation 2/*
+
+# Ignore all png and txt files (i.e.: Results, Traces, and zips)
+*.7z
+*.txt
+*.png
+
+# Exception to allow for ReadMe.txt
+!*/ReadMe.txt
+!*/Read Me.txt
