@@ -51,7 +51,7 @@ for file in files:
     readTxt = fr.read_oscilliscope_txt(TXT_FILE_PATH)
     meta, trace = fr.parse_oscilliscope_txt(readTxt)
     signal = signal_from_trace(np.asarray(trace))
-    phases = signal_to_phase(signal, N, 2*pi/N)
+    phases = signal_to_phase(signal, N, 2*pi/N, True)
     phases = phase_reconstruction(phases, 5)
     t_axis = np.arange(start= 0, 
         stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])

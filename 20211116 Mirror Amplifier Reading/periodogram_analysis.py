@@ -39,7 +39,7 @@ N, M = freq_ratio(signal=SIGNAL_F, sample=SAMPLING_F)
 # file reading
 meta, trace = fr.parse_and_read_oscilliscope_txt(TXT_FILE_PATH)
 signal = signal_from_trace(np.asarray(trace))
-phases = signal_to_phase(signal, N, 2*pi/N)
+phases = signal_to_phase(signal, N, 2*pi/N, True)
 phases = phase_reconstruction(phases, 4.8)
 amplitudes = get_R_signal(signal, N, 2*pi/N) # amplitude over time
 t_axis = np.arange(start= 0, 

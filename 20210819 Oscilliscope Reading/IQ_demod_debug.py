@@ -21,7 +21,7 @@ if __name__ == '__main__':
         delta_phi = phase_advance(SIGNAL_F, SAMPLING_F)
         print(f"{delta_phi = }")
         
-        phases = signal_to_phase(signal, N, delta_phi)
+        phases = signal_to_phase(signal, N, delta_phi, True)
 
         # phase reconstruction 1
         phases_reconstructed = [phases[0]]
@@ -68,7 +68,7 @@ if __name__ == '__main__':
         delta_phi = phase_advance(SIGNAL_F, SAMPLING_F)
         print(f"{delta_phi = }")
         
-        phases = signal_to_phase(signal, N, delta_phi)
+        phases = signal_to_phase(signal, N, delta_phi, True)
         # tolerance for when to wrap over phases
         tol = 4.8
 
@@ -120,7 +120,7 @@ if __name__ == '__main__':
         print()
 
         signal = fr.signal_from_trace(np.asarray(trace))
-        phases = signal_to_phase(signal, 4, pi/2)
+        phases = signal_to_phase(signal, 4, pi/2, True)
         phases = phase_reconstruction(phases, 5)
         plt.plot(phases)
         plt.show(block = True)
@@ -142,7 +142,7 @@ if __name__ == '__main__':
         N, M= freq_ratio(signal=160.025e6, sample=100e3)
 
         signal = fr.signal_from_trace(np.asarray(trace))
-        phases = signal_to_phase(signal, N, 2*pi/N)
+        phases = signal_to_phase(signal, N, 2*pi/N, True)
         phases = phase_reconstruction(phases, 5)
         t_axis = np.arange(start= 0, 
             stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
@@ -167,7 +167,7 @@ if __name__ == '__main__':
         readTxt = fr.read_oscilliscope_txt(TXT_FILE_PATH)
         meta, trace = fr.parse_oscilliscope_txt(readTxt)
         signal = fr.signal_from_trace(np.asarray(trace))
-        phases = signal_to_phase(signal, N, 2*pi/N)
+        phases = signal_to_phase(signal, N, 2*pi/N, True)
         phases = phase_reconstruction(phases, 5)
         plt.plot(phases)
         plt.show(block = True)

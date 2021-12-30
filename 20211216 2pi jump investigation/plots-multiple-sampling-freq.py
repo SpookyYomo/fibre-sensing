@@ -37,7 +37,7 @@ import matplotlib.pyplot as plt
 
 # Step 1: Change the name to which the folder you wish to read from
 # Yield all files in batch folder
-folderpath = os.path.join(os.path.dirname(__file__),'batch 1')
+folderpath = os.path.join(os.path.dirname(__file__),'batch 1b')
 
 def main():
     # Step 2: Change functionalities you wish to perform
@@ -74,10 +74,10 @@ def main():
 
         meta, trace = fr.parse_and_read_oscilliscope_txt(TXT_FILE_PATH)
         signal = signal_from_trace(np.asarray(trace))
-        phases = signal_to_phase(signal, N, 2*pi/N, phase_advancement_correction=True)
-        phases = phase_reconstruction(phases, 4.3)
-        # phases = signal_to_phase(signal, N, 2*pi/N, phase_advancement_correction=False)
-        # phases = phase_reconstruction_2(phases, 2*pi/N)
+        # phases = signal_to_phase(signal, N, 2*pi/N, phase_advancement_correction=True)
+        # phases = phase_reconstruction(phases, 4.3)
+        phases = signal_to_phase(signal, N, 2*pi/N, phase_advancement_correction=False)
+        phases = phase_reconstruction_2(phases, 2*pi/N)
         t_axis = np.arange(start= 0, 
             stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
 
@@ -94,7 +94,7 @@ def main():
             # Saving figure block
             try:
                 print('Saving plot...')
-                fig.savefig(os.path.join(DIRECTORY_WRITE, NAME[:-4] + 'method1.png'), 
+                fig.savefig(os.path.join(DIRECTORY_WRITE, NAME[:-4] + 'method2.png'), 
                     format= 'png')
                 print('Saved')
             except FileNotFoundError:

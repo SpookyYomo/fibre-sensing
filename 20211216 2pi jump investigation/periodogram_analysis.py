@@ -9,6 +9,7 @@
 # | └ IQ_demod.py
 # └ Sub Project folder
 #   ├ Batch Folders
+#   | └ C1-...-000001.txt
 #   └ this script(.py)
 
 # Initialiastion: Directory appending for my system. Vary the directories as necessary.

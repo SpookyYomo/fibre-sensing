@@ -275,6 +275,28 @@ def trace_error_correct(metadata, trace):
 
     return trace
 
+def timeaxis_from_trace(trace):
+    """Extract temporal component of trace structure.
+
+    Input
+    -----
+    Trace: (n x 2) python/numpy array
+
+    Output
+    -----
+    timeaxis: numpy array (n elements)
+
+    """
+    # return np.fromiter(map(lambda x: x[1], trace), dtype=np.float64)
+    if not isinstance(trace, np.ndarray): #if type(trace) != np.ndarray:
+        trace = np.asarray(trace)
+
+    # asserts to be of 2 dimensions with 2 element per row
+    assert trace.ndim == 2
+    assert trace.shape[1] == 2 
+
+    return trace[:,0]
+
 def signal_from_trace(trace):
     """Extract signal component of trace structure.
 

@@ -121,18 +121,14 @@ def _get_Is_and_Qs(signal, N, dphi):
         dtype=np.float64)
     return Is, Qs
 
-def signal_to_phase(signal, N, dphi, phase_advancement_correction= False):
+def signal_to_phase(signal, N, dphi, phase_advancement_correction):
     """Generalized IQ method to determine the phase from the signal.
     
     Over N consequetive data samples, determine the I and Q values for 
     this interval, to then determine the phase at the start of the start 
     of this interval. Utilises Section 3.1 and 3.2.
 
-    Edit (27 Dec): phase_advancement_corr has been set to false with 
-    increasing preference for phase accumulation method in phase 
-    reconstruction. If any old graphs have broken, please set the 
-    opstional parameter to true (particularly if using 
-    phase_reconstruction_1).
+    Edit (1 Jan): phase_advancement_corr has is now to be set explicit.
     
     Input
     ----
@@ -278,7 +274,7 @@ def phase_reconstruction_2(ph, phase_advance, get_deltas=False):
 
     if get_deltas:
         return r
-    results = np.append(results, r)
+    results = np.cumsum(np.append(results, r))
     return results
 
 

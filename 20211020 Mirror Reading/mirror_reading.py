@@ -83,7 +83,7 @@ def main():
 
     # Run the phase algorithm
     signal = signal_from_trace(np.asarray(trace))
-    phases = signal_to_phase(signal, N, 2*pi/N)
+    phases = signal_to_phase(signal, N, 2*pi/N, True)
     phases = phase_reconstruction(phases, 5)
     # phases = signal_to_phase(signal, N, 2*pi/N, False)[::N]
     # phases = phase_reconstruction(phases, 4.8)

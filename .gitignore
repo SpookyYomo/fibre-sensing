@@ -19,6 +19,8 @@ keyboard-shortcuts-windows.pdf
 *.7z
 *.txt
 *.png
+*.html
+*/__pycache__/*
 
 # Exception to allow for ReadMe.txt
 !*/ReadMe.txt
