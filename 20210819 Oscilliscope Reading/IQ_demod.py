@@ -141,7 +141,7 @@ def IQ_signal_to_phase(signal):
     Is, Qs = signal[:,0], signal[:,1]
     return np.arctan2(Qs, Is)
 
-def signal_to_phase(signal, N, dphi, phase_advacement_correction=True):
+def signal_to_phase(signal, N, dphi, phase_advancement_correction=True):
     """Generalized IQ method to determine the phase from the signal.
     
     Over N consequetive data samples, determine the I and Q values for 
@@ -154,7 +154,7 @@ def signal_to_phase(signal, N, dphi, phase_advacement_correction=True):
     N (int): number of samples involved in IQ valuation
     dphi (float): expected value of advancement in phase between time 
         intervals. obtained from phase_advance function
-    phase_advacement_correction (bool): to account for increase in phase
+    phase_advancement_correction (bool): to account for increase in phase
         within a period due to sampling every data point for phase but 
         having a constant IQ axis instead of an IQ axis that advances 
         with the signal to account for appropriate delta
@@ -188,7 +188,7 @@ def signal_to_phase(signal, N, dphi, phase_advacement_correction=True):
 
     # accounting for phase advancement that occurs naturally
     # subtracting the accumulated phase by mod 2pi
-    if phase_advacement_correction and not np.isclose(dphi, 2*pi): 
+    if phase_advancement_correction and not np.isclose(dphi, 2*pi): 
         # assumes that N * dphi leads back to 2pi
         subtraction = [j * dphi for j in range(N)] * (len_signal//N + 1)
         subtraction = np.asarray(subtraction[:len_signal-N])
