@@ -1,7 +1,7 @@
 # This script will performt the regression over all traces opened, and 
 # perform a drifting sinusoidal fit. All the collected results are then 
 # bunched together to see if they obey a linear relationship with 
-# mirror_frequency.
+# mirror_amplitude.
 
 # . Honours Module Folder
 # ├ FYPLibrary
