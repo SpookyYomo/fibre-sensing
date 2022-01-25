@@ -50,7 +50,7 @@ def drifting_sin(x, A, f, phi, m, c):
 
 def main():
     # Step 2: Change functionalities you wish to perform
-    INDIVIDUAL_PLOTS = True
+    INDIVIDUAL_PLOTS = False
     DISPLAY_INDIVIDUAL_PLOTS = False
     FINAL_REGRESSION = True
 
@@ -78,6 +78,7 @@ def main():
             print("[Warning] An oscilliscope trace with no driving mirror \
                 has been detected. Please ensure that the phase trace is as \
                 expected.")
+        mVpp *= 50
         delta_corr -= 80.125
         delta_corr *= 1e6 # converts MHz to Hz
         print(f"[Int Debug] {NAME = }, {f = }, {mVpp = }, delta_corr = {delta_corr:.5f}Hz")
@@ -142,7 +143,7 @@ def main():
                 step = 0.005*(np.max(xs)-np.min(xs))), 
             linear(mVpp_axis, *popt),
             markersize = 1)
-        plt.title(f'$A$ against mVpp\n ($A$ = $m$*mVpp + $c$: $(m, c)$ = \
+        plt.title(f'$A$ against mVpp\n ($A$ = $m$*mVpp + $c$): $(m, c)$ = \
             {fittings}', useTex= True)
 
     ax.set_ylabel(r'$A$/rad', useTex = True)

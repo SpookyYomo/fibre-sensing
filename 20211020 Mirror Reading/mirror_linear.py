@@ -42,8 +42,9 @@ results = []
 for file in files:
     NAME = file
     TXT_FILE_PATH = file_str_to_path(NAME, dir=os.path.dirname(__file__)+'\Batch 4')
-    
+    if NAME[0] != 'C': continue
     f, mVpp = get_f_and_A_from_filename(NAME)
+    mVpp *= 50
     if f == 0:
         continue
     print(f"{NAME = }, {f = }, {mVpp = }")
@@ -82,4 +83,7 @@ ax.errorbar(xs, ys,
 ax.set_ylabel(r'$A$/rad', useTex = True)
 ax.set_xlabel(r'mVpp', useTex = True)
 plt.title('A against mVpp')
+# powerpoint is 13.333 inches wide by 7.5 inches high
+fig.set_size_inches(0.45*(13+1/3-1.5), 0.8*(7.5-2)) 
+fig.tight_layout()
 plt.show(block=True)
