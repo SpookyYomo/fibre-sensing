@@ -64,7 +64,7 @@ def main():
     folderpath = os.path.dirname(__file__)+'\Batch 1'
 
     # Step 2: Change functionalities you wish to perform
-    DISPLAY_INDIVIDUAL_PLOTS = False
+    DISPLAY_INDIVIDUAL_PLOTS = True
 
     # Initialisation
     # results = [] # (frequency deviation, gradient (m), std deviation (delta_m)) 
@@ -96,10 +96,10 @@ def main():
         # file reading
         trace_meta, trace = fr.parse_and_read_oscilliscope_txt(TXT_FILE_PATH)
         signal = signal_from_trace(np.asarray(trace))
-        phases = signal_to_phase(signal, N, 2*pi/N, phase_advancement_correction=True)
-        phases = phase_reconstruction(phases, 4.3)
-        # phases = signal_to_phase(signal, N, 2*pi/N, phase_advancement_correction=False)
-        # phases = phase_reconstruction_2(phases, 2*pi/N)
+        # phases = signal_to_phase(signal, N, 2*pi/N, phase_advancement_correction=True)
+        # phases = phase_reconstruction(phases, 4.3)
+        phases = signal_to_phase(signal, N, 2*pi/N, phase_advancement_correction=False)
+        phases = phase_reconstruction_2(phases, 2*pi/N)
         amplitudes = get_R_signal(signal, N, 2*pi/N) # amplitude over time
         t_axis = np.arange(start= 0, 
             stop= (int(trace_meta["Record Length"][0])-N) * trace_meta['Sample Interval'][0], 
@@ -182,7 +182,7 @@ def main():
         fig.tight_layout()
         # fig.subplots_adjust(left=0.10, top=0.91)
         if DISPLAY_INDIVIDUAL_PLOTS:
-            plt.show()
+            plt.show(block = (my_input!=-1))
             plt.pause(15)
         print("Saving fig...")
         fig.savefig(os.path.join(DIRECTORY_WRITE, NAME[:-4] + '_periodogram.png'), \
