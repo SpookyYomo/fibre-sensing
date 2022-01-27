@@ -86,12 +86,12 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
 
     # Edit Initialisation
     num_vars = numerical_variables_from_name(NAME)
-    SIGNAL_F = 80.125e6*2 #Hz 
+    SIGNAL_F = 80.0625e6*2 #Hz 
     SAMPLING_F = 1.0e6 #Hz
     ph_ad = phase_advance(SIGNAL_F, SAMPLING_F) # phase advance = 2*pi/N
     N, _ = freq_ratio(signal=SIGNAL_F, sample=SAMPLING_F)
     print(f"[Int Debug] {num_vars = }, {N = }")
-    _, _, mVpp, mirror_f = num_vars
+    _, _, _, mVpp, mirror_f = num_vars
 
     # Get phases over time
     meta, trace = fr.parse_and_read_oscilliscope_txt(file)
@@ -102,15 +102,15 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
         stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
 
     # Regression to obtain mirror freq
-    drifting_sin_bounds = ((0.03*mVpp,      0,  -2*pi, -np.inf, -np.inf), \
-                           (   np.inf, np.inf,   2*pi,  np.inf,  np.inf))
+    drifting_sin_bounds = ((     0,      0,  -2*pi, -np.inf, -np.inf), \
+                           (np.inf, np.inf,   2*pi,  np.inf,  np.inf))
     popt, pcov = optimize.curve_fit(drifting_sin, t_axis, phases, 
         p0= [0.05*mVpp, mirror_f, 0, 0, 0.5*(max(phases[:1000])+min(phases[:1000]))], 
         bounds= drifting_sin_bounds)
     fittings = EPstandard.easy_read_popt_pcov(popt, pcov)
-
+    
     # we pass this value into main() for appending
-    value = (mirror_f, popt[1], np.sqrt(pcov[1][1])) 
+    value = (mVpp, popt[0], np.sqrt(pcov[0][0])) 
 
     # Draw figure
     if gen_plot:
@@ -119,13 +119,14 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
         ax.set_ylabel(r'$\phi$/rad', useTex = True)
         ax.set_xlabel(r'$t$/s', useTex = True)
         plt.title(f"$f_{{Mirror}}$ = {mirror_f}Hz, Piezo Ampl = {mVpp}mVpp, \
+            \nSampling Freq =  = {SAMPLING_F/1e6:.2f}MS/s, AOM Freq = {SIGNAL_F/1e6:.4f}MHz, N = {N} \
             \n(A, $f$, $\phi_0$, m, c) = {fittings}",
             useTex= True )
         # powerpoint is 13.333 inches wide by 7.5 inches high
         fig.set_size_inches(1.0*(13+1/3-1.5), 0.8*(7.5-2)) 
         fig.tight_layout()
         if display_plot:
-            plt.show(block= False)
+            plt.show(block= True)
             plt.pause(0.8)
         # Saving figure block
         try:
@@ -186,7 +187,7 @@ def main():
     print(f"Results will be written to: {DIR_WRITE}")
     results = []
     for file in files:
-        results.append(per_file(file, DIR_WRITE, True, False))
+        results.append(per_file(file, DIR_WRITE, True, len(files)==1))
     if len(set(map(lambda x: x[0], results))) <= 1: 
         print("Insufficient x-axis to determine linear relationship.\n \
             Script has ended")
