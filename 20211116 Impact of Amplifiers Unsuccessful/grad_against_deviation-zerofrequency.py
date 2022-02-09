@@ -81,7 +81,8 @@ def main():
                 plt.show(block = False)
                 plt.pause(0.8)
             DIRECTORY_WRITE = os.path.dirname(__file__)
-            fig.savefig(os.path.join(DIRECTORY_WRITE, NAME[:-4] + '.png'))
+            fig.set_size_inches(0.45*(13+1/3), 4) # powerpoint
+            fig.savefig(os.path.join(DIRECTORY_WRITE, NAME[:-4] + '.png'), format= 'png', dpi = 300)
             plt.close()
         
         results.append((delta_corr, popt[0], np.sqrt(pcov[0][0])))
