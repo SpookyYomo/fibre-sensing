@@ -116,9 +116,9 @@ def _get_Is_and_Qs(signal, N, dphi):
     # Qs = (2/N) * np.fromiter([np.sum([signal[j+i]*cosines[i] for i in range(N)]) for j in range(len_signal-N)], dtype=np.float64)
     # print(f"[Debug] {signal[0:N] = }")
     Is = (2/N) * np.fromiter([np.dot(signal[j:j+N], sines) for j in range(len_signal-N)], 
-        dtype=np.float64)
+        dtype= np.float64, count= len_signal-N)
     Qs = (2/N) * np.fromiter([np.dot(signal[j:j+N], cosines) for j in range(len_signal-N)], 
-        dtype=np.float64)
+        dtype= np.float64, count= len_signal-N)
     return Is, Qs
 
 def signal_to_phase(signal, N, dphi, phase_advancement_correction):
