@@ -4,10 +4,12 @@ This file aims to help with the reading of LeCroy output files.
 """
 
 import os, re
+from signal import signal
 
 # from numpy.core.defchararray import array
 import numpy as np
 import pandas as pd
+import lecroyparser as lcp
 
 ### General ###
 def transpose(m):
@@ -147,7 +149,7 @@ def parse_oscilliscope_txt(txtarray):
     return metadata, trace
 
 def parse_and_read_oscilliscope_txt(txtfilepath):
-    """From text file, output into meta-data and trace.
+    """From text file (ASCII w/ header), output into meta-data and trace.
     
     Inputs
     ------
@@ -160,6 +162,8 @@ def parse_and_read_oscilliscope_txt(txtfilepath):
     trace: (n by 2) numpy array
         n rows of 2-element tuple: (timing, oscilliscope trace). 
     """
+    if txtfilepath[-4:] != '.txt':
+        raise ValueError(f'Incorrect file type has been used (txt expected): {txtfilepath}')
     # parse by pandas
     trace = pd.read_csv(txtfilepath, delimiter=' ', header=None, 
         usecols=[3,4])
@@ -174,7 +178,119 @@ def parse_and_read_oscilliscope_txt(txtfilepath):
     keys, numericals, units = meta_temp[0], meta_temp[1], meta_temp[2]
     vals = zip(numericals, units)
     meta = dict(zip(keys, vals))
+    print(f"[Log] file supplied = {txtfilepath}\n[Log] {meta = }")
     return meta, trace
+
+def parse_and_read_oscilliscope_trc(trcfilepath):
+    """From Le Croy trc file (binary w/ word), output into numpy-trace.
+    
+    Inputs
+    ------
+    txtfilepath: os.path object
+    
+    Outputs
+    -------
+    time-axis: (n by 1) numpy array of timing
+    signal: (n by 1) numpy array of signal
+    """
+    if trcfilepath[-4:] != '.trc':
+        raise ValueError(f'Incorrect file type has been used (trc expected): {trcfilepath}')
+    
+    scope_data = lcp.ScopeData(path= trcfilepath)
+    time, *signal = scope_data.parseFile(path= trcfilepath)
+    print(f"[Log] file supplied = {trcfilepath}\n[Log] meta is not embedded")
+    return time, signal
+
+def timeaxis_from_trace(trace):
+    """Extract temporal component of trace structure.
+
+    Input
+    -----
+    Trace: (n x 2) python/numpy array
+
+    Output
+    -----
+    timeaxis: numpy array (n elements)
+
+    """
+    # return np.fromiter(map(lambda x: x[1], trace), dtype=np.float64)
+    if not isinstance(trace, np.ndarray): #if type(trace) != np.ndarray:
+        trace = np.asarray(trace)
+
+    # asserts to be of 2 dimensions with 2 element per row
+    assert trace.ndim == 2
+    assert trace.shape[1] == 2 
+
+    return trace[:,0]
+
+def signal_from_trace(trace):
+    """Extract signal component of trace structure.
+
+    With the metadata and trace corrected, we assumed that regular 
+    spacing has since been guranteed. Now obtain just the signal to 
+    perform FFT to determine the fourier signals.
+    
+    Input
+    -----
+    Trace: (n x 2) python/numpy array
+
+    Output
+    -----
+    Signal: numpy array (n elements)
+
+    """
+    # return np.fromiter(map(lambda x: x[1], trace), dtype=np.float64)
+    if not isinstance(trace, np.ndarray): #if type(trace) != np.ndarray:
+        trace = np.asarray(trace)
+
+    # asserts to be of 2 dimensions with 2 element per row
+    assert trace.ndim == 2
+    assert trace.shape[1] == 2 
+
+    return trace[:,1]
+
+### Text parser ###
+def _text_trimmer(elem):
+    """Removes only alphabets from a string."""
+    return ''.join(i for i in elem if not i.isalpha())
+
+def numerical_variables_from_name(name, delimiter = '-'):
+    """Removes alphabets to get numbers from Lecroy filename.
+    
+    Example: 
+    'C2-341Hz-250mVpp-040Correction00003.txt' -> [2, 341, 250, 40]
+    'C1-M150Hz-M200mVpp--050HzDelta00000.txt' -> [1, 150, 200, -50]
+    'C1-M150Hz-M200mVpp-80.125050Hz00000.txt' -> [1, 150, 200, 80.125050]
+
+    Input
+    -----
+    name: string, as given
+
+    Output
+    -----
+    result: list of floats of variables extracted
+    """
+    name = name[:-9] # Remove 00000.txt
+    name = name.split(delimiter)
+
+    if delimiter == '-' and '' in name:
+        # Reinsert - sign to next element in list since removed by .split
+        indices = [i for i, x in enumerate(name) if x=='']
+        for i in indices:
+            name[i+1] = '-' + name[i+1]
+    # Strip text
+    name = map(_text_trimmer, name)
+
+    # Remove blank elements
+    name = filter(lambda x: x != '', name)
+    # for _ in filter(lambda x: x == '', name):
+    #     name.remove('')
+
+    # Yield numbers only
+    result = list(map(float, name))
+    return result
+
+### Debugging
 
 def trace_error_correct(metadata, trace):
     """determine if trace has unsual time stamping, guided by meta-data
@@ -274,92 +390,3 @@ def trace_error_correct(metadata, trace):
         print(f"New value: {trace[n-1][0] = }")
 
     return trace
-
-def timeaxis_from_trace(trace):
-    """Extract temporal component of trace structure.
-
-    Input
-    -----
-    Trace: (n x 2) python/numpy array
-
-    Output
-    -----
-    timeaxis: numpy array (n elements)
-
-    """
-    # return np.fromiter(map(lambda x: x[1], trace), dtype=np.float64)
-    if not isinstance(trace, np.ndarray): #if type(trace) != np.ndarray:
-        trace = np.asarray(trace)
-
-    # asserts to be of 2 dimensions with 2 element per row
-    assert trace.ndim == 2
-    assert trace.shape[1] == 2 
-
-    return trace[:,0]
-
-def signal_from_trace(trace):
-    """Extract signal component of trace structure.
-
-    With the metadata and trace corrected, we assumed that regular 
-    spacing has since been guranteed. Now obtain just the signal to 
-    perform FFT to determine the fourier signals.
-    
-    Input
-    -----
-    Trace: (n x 2) python/numpy array
-
-    Output
-    -----
-    Signal: numpy array (n elements)
-
-    """
-    # return np.fromiter(map(lambda x: x[1], trace), dtype=np.float64)
-    if not isinstance(trace, np.ndarray): #if type(trace) != np.ndarray:
-        trace = np.asarray(trace)
-
-    # asserts to be of 2 dimensions with 2 element per row
-    assert trace.ndim == 2
-    assert trace.shape[1] == 2 
-
-    return trace[:,1]
-
-### Text parser ###
-def _text_trimmer(elem):
-    """Removes only alphabets from a string."""
-    return ''.join(i for i in elem if not i.isalpha())
-
-def numerical_variables_from_name(name, delimiter = '-'):
-    """Removes alphabets to get numbers from Lecroy filename.
-    
-    Example: 
-    'C2-341Hz-250mVpp-040Correction00003.txt' -> [2, 341, 250, 40]
-    'C1-M150Hz-M200mVpp--050HzDelta00000.txt' -> [1, 150, 200, -50]
-    'C1-M150Hz-M200mVpp-80.125050Hz00000.txt' -> [1, 150, 200, 80.125050]
-
-    Input
-    -----
-    name: string, as given
-
-    Output
-    -----
-    result: list of floats of variables extracted
-    """
-    name = name[:-9] # Remove 00000.txt
-    name = name.split(delimiter)
-
-    if delimiter == '-' and '' in name:
-        # Reinsert - sign to next element in list since removed by .split
-        indices = [i for i, x in enumerate(name) if x=='']
-        for i in indices:
-            name[i+1] = '-' + name[i+1]
-    # Strip text
-    name = map(_text_trimmer, name)
-
-    # Remove blank elements
-    name = filter(lambda x: x != '', name)
-    # for _ in filter(lambda x: x == '', name):
-    #     name.remove('')
-
-    # Yield numbers only
-    result = list(map(float, name))
-    return result

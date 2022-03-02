@@ -21,6 +21,7 @@ keyboard-shortcuts-windows.pdf
 # Ignore all png and txt files (i.e.: Results, Traces, and zips)
 *.7z
 *.txt
+*.trc
 *.png
 *.html
 */__pycache__/*
@@ -28,3 +29,4 @@ keyboard-shortcuts-windows.pdf
 # Exception to allow for ReadMe.txt
 !*/ReadMe.txt
 !*/Read Me.txt
+!FYPLibrary/*/*
