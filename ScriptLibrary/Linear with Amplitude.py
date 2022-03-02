@@ -116,12 +116,12 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
     if gen_plot:
         fig, ax = plt.subplots(nrows=1, ncols=1)
         ax.plot(t_axis, phases, color = 'mediumblue')
-        ax.set_ylabel(r'$\phi$/rad', useTex = True)
-        ax.set_xlabel(r'$t$/s', useTex = True)
+        ax.set_ylabel(r'$\phi$/rad', usetex= True)
+        ax.set_xlabel(r'$t$/s', usetex= True)
         plt.title(f"$f_{{Mirror}}$ = {mirror_f}Hz, Piezo Ampl = {mVpp}mVpp, \
             \nSampling Freq =  = {SAMPLING_F/1e6:.2f}MS/s, AOM Freq = {SIGNAL_F/1e6:.4f}MHz, N = {N} \
             \n(A, $f$, $\phi_0$, m, c) = {fittings}",
-            useTex= True )
+            usetex= True )
         # powerpoint is 13.333 inches wide by 7.5 inches high
         fig.set_size_inches(1.0*(13+1/3-1.5), 0.8*(7.5-2)) 
         fig.tight_layout()
@@ -162,8 +162,8 @@ def final_movement(result, wd):
         markersize = 1)
     plt.title(f"Regressed freq oscillation against mirror oscillation\n \
         $y=mx+c$: ($m, c$) = {fittings}")
-    ax.set_ylabel(r'$f_{Regressed}$ /Hz', useTex = True)
-    ax.set_xlabel(r'$f_{Mirror}$ /Hz', useTex = True)
+    ax.set_ylabel(r'$f_{Regressed}$ /Hz', usetex= True)
+    ax.set_xlabel(r'$f_{Mirror}$ /Hz', usetex= True)
 
     # Save plot
     # powerpoint is 13.333 inches wide by 7.5 inches high

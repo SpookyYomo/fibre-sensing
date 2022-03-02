@@ -99,10 +99,10 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
     if gen_plot:
         fig, ax = plt.subplots(nrows=1, ncols=1)
         ax.plot(t_axis, phases, color = 'mediumblue')
-        ax.set_ylabel(r'$\phi$/rad', useTex = True)
-        ax.set_xlabel(r'$t$/s', useTex = True)
+        ax.set_ylabel(r'$\phi$/rad', usetex= True)
+        ax.set_xlabel(r'$t$/s', usetex= True)
         plt.title(f"Phase Reconstruction", \
-            useTex= True )
+            usetex= True )
         if display_plot:
             plt.show(block= False)
             plt.pause(0.8)

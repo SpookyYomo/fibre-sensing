@@ -132,24 +132,24 @@ def per_file(file, wd, display_plot, **kwargs):
         axisT = np.fromiter([i* dt for i in range(len(signal))], 
             dtype= np.float32, count= len(signal))
         ax.plot(axisT, signal, color = 'mediumblue')
-    ax.set_ylabel(r'$y(t)$/V', useTex = True)
-    ax.set_xlabel(r'$t$/s', useTex = True)
-    ax.set_title(f"Signal", useTex = False)
+    ax.set_ylabel(r'$y(t)$/V', usetex= True)
+    ax.set_xlabel(r'$t$/s', usetex= True)
+    ax.set_title(f"Signal", usetex= False)
 
     # phase plot
     ax = axs[0, 1]
     ax.plot(t_axis, phases, color = 'mediumblue')
     # ax.plot(t_axis, linear(t_axis, *popt), color = 'darkgreen', markersize = 3)
-    ax.set_ylabel(r'$\phi$/rad', useTex = True)
-    ax.set_xlabel(r'$t$/s', useTex = True)
-    ax.set_title(f"Phase", useTex = False)
+    ax.set_ylabel(r'$\phi$/rad', usetex= True)
+    ax.set_xlabel(r'$t$/s', usetex= True)
+    ax.set_title(f"Phase", usetex= False)
 
     # amplitudes plot
     ax = axs[0, 2]
     ax.plot(t_axis, amplitudes, color = 'mediumblue')
-    ax.set_ylabel(r'$A(t)$/V', useTex = True)
-    ax.set_xlabel(r'$t$/s', useTex = True)
-    ax.set_title(f"Amplitude", useTex = False)
+    ax.set_ylabel(r'$A(t)$/V', usetex= True)
+    ax.set_xlabel(r'$t$/s', usetex= True)
+    ax.set_title(f"Amplitude", usetex= False)
     
     # spectral of signal plot
     ax = axs[1, 0]
@@ -188,7 +188,7 @@ def per_file(file, wd, display_plot, **kwargs):
     axs[0, 2].set_xlim(0, 2/200)
 
     fig.suptitle(f"Sampling freq $f= ${SAMPLING_F/1e6} MHz, AOM freq = \
-        {SIGNAL_F/1e6:.6f}MHz, N = {N}", useTex= True)
+        {SIGNAL_F/1e6:.6f}MHz, N = {N}", usetex= True)
     fig.set_size_inches(11.75-1.5, 8.25-2 - 1)
     fig.tight_layout()
 

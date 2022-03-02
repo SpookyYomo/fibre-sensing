@@ -111,11 +111,11 @@ def per_file(file, wd, gen_plot, display_plot):
     if gen_plot:
         fig, ax = plt.subplots(nrows=1, ncols=1)
         ax.plot(t_axis, phases, color = 'mediumblue')
-        ax.set_ylabel(r'$\phi$/rad', useTex = True)
-        ax.set_xlabel(r'$t$/s', useTex = True)
+        ax.set_ylabel(r'$\phi$/rad', usetex= True)
+        ax.set_xlabel(r'$t$/s', usetex= True)
         plt.title(f"$f_{{Mirror}}$ = {f}Hz, Piezo Ampl = {mVpp}mVpp, \
             Signal Freq = {SIGNAL_F:6.0F}Hz, \n(A, $f$, $\phi_0$, m, \
-            c) = {fittings}", useTex= True)
+            c) = {fittings}", usetex= True)
         if display_plot:
             plt.show(block= False)
             plt.pause(0.8)
@@ -151,10 +151,10 @@ def final_movement(accum, dw):
         linear(mVpp_axis, *popt),
         markersize = 1)
     plt.title(f'$A$ against mVpp\n ($A$ = $m$*mVpp + $c$: $(m, c)$ = \
-        {fittings}', useTex= True)
+        {fittings}', usetex= True)
 
-    ax.set_ylabel(r'$A$/rad', useTex = True)
-    ax.set_xlabel(r'mVpp', useTex = True)
+    ax.set_ylabel(r'$A$/rad', usetex= True)
+    ax.set_xlabel(r'mVpp', usetex= True)
     ax.xaxis.set_minor_locator(AutoMinorLocator())
     ax.yaxis.set_minor_locator(AutoMinorLocator())
     plt.grid(True, which='major', axis='both')
