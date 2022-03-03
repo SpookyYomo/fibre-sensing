@@ -49,7 +49,7 @@ signal = signal_from_trace(np.asarray(trace))
 # phase reconstuction block
 phases = signal_to_phase(signal, N, 2*pi/N, phase_advancement_correction= False)
 t_axis = np.arange(start= 0, 
-    stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0],
+    stop= (int(meta["Record Length"][0])-N+1) * meta['Sample Interval'][0],
     step= meta['Sample Interval'][0])
 phases = phase_reconstruction_3(phases, 2*pi/N, grad_tolerance=0.3)
 

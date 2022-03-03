@@ -79,7 +79,7 @@ def main():
         phases = signal_to_phase(signal, N, 2*pi/N, phase_advancement_correction=False)
         phases = phase_reconstruction_2(phases, 2*pi/N)
         t_axis = np.arange(start= 0, 
-            stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
+            stop= (int(meta["Record Length"][0])-N+1) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
 
         if INDIVIDUAL_PLOTS:
             fig, ax = plt.subplots(nrows=1, ncols=1)

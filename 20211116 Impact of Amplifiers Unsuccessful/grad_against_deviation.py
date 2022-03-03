@@ -64,7 +64,7 @@ def main():
         phases = signal_to_phase(signal, N, 2*pi/N, True)
         phases = phase_reconstruction(phases, 4.3)
         t_axis = np.arange(start= 0, 
-            stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
+            stop= (int(meta["Record Length"][0])-N+1) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
         
         popt, pcov = optimize.curve_fit(fit_fn, t_axis, phases, p0= [2.5/50 * mVpp, f, 4.5, (delta_corr)*12, 0])
         fittings = EPstandard.easy_read_popt_pcov(popt, pcov)

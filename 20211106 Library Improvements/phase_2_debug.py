@@ -52,7 +52,7 @@ def main():
     phases = phase_reconstruction_2(phases, phase_advance= 2*pi/N)
     # phases = phase_reconstruction(phases, 4.3)
     t_axis = np.arange(start= 0, 
-        stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0],
+        stop= (int(meta["Record Length"][0])-N+1) * meta['Sample Interval'][0],
         step= meta['Sample Interval'][0])
 
     fig, ax = plt.subplots(nrows=1, ncols=1)

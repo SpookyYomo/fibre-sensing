@@ -145,7 +145,7 @@ if __name__ == '__main__':
         phases = signal_to_phase(signal, N, 2*pi/N, True)
         phases = phase_reconstruction(phases, 5)
         t_axis = np.arange(start= 0, 
-            stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
+            stop= (int(meta["Record Length"][0])-N+1) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
 
         fig, ax = plt.subplots(nrows=1, ncols=1)
         ax.plot(t_axis, phases)

@@ -63,7 +63,7 @@ def main():
         phases = signal_to_phase(signal, N, 2*pi/N, True)
         phases = phase_reconstruction(phases, 4.8)
         t_axis = np.arange(start= 0, 
-            stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
+            stop= (int(meta["Record Length"][0])-N+1) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
         
         # set initial to 0 value
         phases -= phases[0]

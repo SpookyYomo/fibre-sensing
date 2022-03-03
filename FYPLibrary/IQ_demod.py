@@ -108,17 +108,15 @@ def _get_Is_and_Qs(signal, N, dphi):
     # lookup tables
     sines = np.sin([i * dphi for i in range(N)])
     cosines = np.cos([i * dphi for i in range(N)])
-    # print(f"[Debug] {N = }")
-    # print(f"[Debug] {len(sines) = }")
 
     # summation process # rewrite for direct multiplication
-    # Is = (2/N) * np.fromiter([np.sum([signal[j+i]*sines[i] for i in range(N)]) for j in range(len_signal-N)], dtype=np.float64)
-    # Qs = (2/N) * np.fromiter([np.sum([signal[j+i]*cosines[i] for i in range(N)]) for j in range(len_signal-N)], dtype=np.float64)
     # print(f"[Debug] {signal[0:N] = }")
-    Is = (2/N) * np.fromiter([np.dot(signal[j:j+N], sines) for j in range(len_signal-N)], 
-        dtype= np.float64, count= len_signal-N)
-    Qs = (2/N) * np.fromiter([np.dot(signal[j:j+N], cosines) for j in range(len_signal-N)], 
-        dtype= np.float64, count= len_signal-N)
+    # Is = (2/N) * np.fromiter([np.dot(signal[j:j+N], sines) for j in range(len_signal-N)], 
+    #     dtype= np.float64, count= len_signal-N)
+    # Qs = (2/N) * np.fromiter([np.dot(signal[j:j+N], cosines) for j in range(len_signal-N)], 
+    #     dtype= np.float64, count= len_signal-N)
+    Is = (2/N) * np.convolve(signal, sines[::-1], mode= 'valid')
+    Qs = (2/N) * np.convolve(signal, cosines[::-1], mode= 'valid')
     return Is, Qs
 
 def signal_to_phase(signal, N, dphi, phase_advancement_correction):
@@ -208,6 +206,7 @@ def phase_reconstruction_naive(ph, tol):
     
     return r
 
+# tolerance method
 def phase_reconstruction(ph, tol, phase_advance= 0):
     """Phase reconstruction after arctan.
     
@@ -241,7 +240,6 @@ def phase_reconstruction(ph, tol, phase_advance= 0):
     r = np.asarray(r) # faster to append a Py list, convert to np
     return r
 
-### Experimental
 # delta tracking method
 def phase_reconstruction_2(ph, phase_advance, get_deltas=False):
     """Phase reconstruction after arctan.
@@ -261,102 +259,9 @@ def phase_reconstruction_2(ph, phase_advance, get_deltas=False):
     phase (np iterable): phase wrapped around 2pi accounted phase"""
     results = np.asarray([ph[0]])
     phase_advance %= 2*pi
-    # for i in range(1, len(ph)):
-    #     expected_phase = ph[i-1] + phase_advance
-    #     # choose between the least difference (especially when expected 
-    #     # phase > 2pi)
-    #     delta = case1 if abs(case1:= ph[i]-expected_phase) < \
-    #         abs(case2:= case1+2*pi) else case2
-    #     results.append(delta)
-    r = np.fromiter([case1 if abs(case1:= ph[i]-ph[i-1]-phase_advance) < \
-            abs(case2:= case1+2*pi) else case2 for i in range(1,len(ph))], \
-                dtype= np.float32, count= len(ph)-1)
-
+    x = np.convolve(ph, [1, -1], mode= 'valid') - phase_advance
+    r = 2*pi*(x<-pi) + x
     if get_deltas:
         return r
     results = np.cumsum(np.append(results, r))
     return results
-
-
-# gradient method reconstruction (jy suggestion)
-from math import copysign
-sign = lambda x: 0 if x == 0 else int(copysign(1,x))
-# sign = lambda x: int(x > 0) - int(x < 0)
-
-def phase_reconstruction_3(phases, phase_advance, grad_tolerance= 0.2, 
-    twoPi_tolerance= [1.9, 0], step_size_tol= [2,5], debug=(False, 0,0),
-    get_deltas = False):
-    """TODO: Function descriptor."""
-    # Variables passed are valid
-    
-    # Initialisation
-    results =  [phases[0]]
-    phase_advance %= 2*pi
-    m, prev_m, css, prev_css = 0, 0, 0, 0 # gradient direction (with diffused 0); number of consecutive same sign
-    
-    for i in range(1, len(phases)):
-        expected_phase = phases[i-1] + phase_advance
-        delta = case1 if abs(case1:= phases[i]-expected_phase) < abs(case2:=case1+2*pi) else case2
-        prev_m = m
-        if abs(delta) > grad_tolerance:
-            # "add" 1 if same sign 
-            m = m + sign(delta) if sign(m)*sign(delta) == 1 else sign(delta)
-        else:
-            m = 0
-        prev_css = css
-        css = css+sign(delta) if sign(delta)==sign(css) else sign(delta)
-        
-        if debug[0] and debug[2] - debug[1] < 101 and debug[1] <= i <= debug[2]:
-            print(f"\n{i = }\n{delta = }")
-            print(f"{m = }, {prev_m = },{sign(m)!=sign(prev_m) = }")
-            print(f"{step_size_tol[0] <= abs(prev_m) <= step_size_tol[1] = }")
-            print(f"{css = }, {sum(results[-prev_css:]) = }")
-            print(f"{(2*pi - twoPi_tolerance[0]) <= abs(sum(results[-prev_css:])) < (2*pi + twoPi_tolerance[1]) = }")
-
-        # if m==0 and abs(prev_m) in step_size_tol or sum(results[-prev_css:]) is close to 2*pi:
-        if sign(m)!=sign(prev_m) and step_size_tol[0] <= abs(prev_m) <= step_size_tol[1] and \
-            (2*pi - twoPi_tolerance[0]) <= abs(sum(results[-prev_css:])) < (2*pi+twoPi_tolerance[1]):
-            print(f"Step {i = } has injected {-sign(prev_m)} * 2*pi.")
-            for j in range(s:= step_size_tol[0]):
-                results[-j] += -sign(prev_m) *2*pi/s
-            
-        results.append(delta)
-    if get_deltas:
-        return np.asarray(results)
-    results = np.cumsum(results)
-    return results
-
-# larger window for time average (ari suggestion)
-def phase_reconstruction_4(phases, phase_advance, s=100, q=8, debug=(False, 0,0),
-    get_deltas = False):
-    """TODO: Function descriptor."""
-    # Variables passed are valid
-    
-    # Initialisation
-    results =  [phases[0]]
-    phase_advance %= 2*pi
-    
-    for i in range(1, s):
-        expected_phase = phases[i-1] + phase_advance
-        delta = case1 if abs(case1:= phases[i]-expected_phase) < abs(case2:=case1+2*pi) else case2
-
-        results.append(delta)
-
-    hist_timeavg = []
-    for i in range(s, len(phases)):
-        expected_phase = phases[i-1] + phase_advance
-        delta = case1 if abs(case1:= phases[i]-expected_phase) < abs(case2:=case1+2*pi) else case2
-
-        results.append(delta)
-
-        hist_timeavg.append(timeavg_recent := average(phases[-s:]))
-        # if len(hist_timeavg) > s:
-        #     hist_timeavg.pop(0)
-                
-        # if abs(timeavgarr[i+N]-timeavgarr[i]) \approx 2pi for a few i:
-        #     increase by 2pi
-
-    # if get_deltas:
-    #     return np.asarray(results)
-    # results = np.cumsum(results)
-    return np.asarray(hist_timeavg)

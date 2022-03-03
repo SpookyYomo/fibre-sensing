@@ -87,7 +87,7 @@ def main():
         phases = signal_to_phase(signal, N, 2*pi/N, True)
         phases = phase_reconstruction(phases, 4.3)
         t_axis = np.arange(start= 0, 
-            stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
+            stop= (int(meta["Record Length"][0])-N+1) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
         
         drifting_sin_bounds = ((0.03*mVpp,      0,  -2*pi, -np.inf, -np.inf), \
                                (   np.inf, np.inf,  2*pi,  np.inf,  np.inf))

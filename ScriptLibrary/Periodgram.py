@@ -114,7 +114,7 @@ def per_file(file, wd, display_plot, **kwargs):
     phases = phase_reconstruction_2(phases, ph_ad)
     amplitudes = get_R_signal(signal, N, ph_ad)
     t_axis = np.arange(start= 0, 
-        stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0], \
+        stop= (int(meta["Record Length"][0])-N+1) * meta['Sample Interval'][0], \
         step= meta['Sample Interval'][0])
     time_axis = timeaxis_from_trace(trace)
 

@@ -99,7 +99,7 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
     phases = signal_to_phase(signal, N, ph_ad, phase_advancement_correction= False)
     phases = phase_reconstruction_2(phases, ph_ad)
     t_axis = np.arange(start= 0, 
-        stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
+        stop= (int(meta["Record Length"][0])-N+1) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
 
     # Regression to obtain mirror freq
     drifting_sin_bounds = ((     0,      0,  -2*pi, -np.inf, -np.inf), \

@@ -45,7 +45,7 @@ phases = signal_to_phase(signal, N, 2*pi/N, True)
 phases = phase_reconstruction(phases, 4.3)
 amplitudes = get_R_signal(signal, N, 2*pi/N) # amplitude over time
 t_axis = np.arange(start= 0, 
-    stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
+    stop= (int(meta["Record Length"][0])-N+1) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
 time_axis = np.arange(start= 0, 
     stop= (int(meta["Record Length"][0])) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
 

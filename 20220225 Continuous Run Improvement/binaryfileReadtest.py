@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 # from matplotlib.ticker import AutoMinorLocator
 
 import lecroyparser as lcp
-import binascii
+from time import perf_counter as pc
 
 def get_files():
     # uses tkinter to get the paths. returns all files as selected by UI
@@ -91,6 +91,8 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
     # Lecroy parser
     time_axis, signals = parse_and_read_oscilliscope_trc(file)
     signal = signals[0]
+    # meta, trace = parse_and_read_oscilliscope_txt(file)
+    # signal = signal_from_trace(trace)
 
     # Get phases over time
 
@@ -102,9 +104,12 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
         'Trigger Time': ('unknown', 's'), \
         'Horizontal Offset': ('unknown', 's')}
     phases = signal_to_phase(signal, N, ph_ad, phase_advancement_correction= False)
+    tic = pc()
     phases = phase_reconstruction_2(phases, ph_ad)
+    toc = pc()
+    print(f"phase reconstruction took {toc - tic:.4}s.")
     t_axis = np.arange(start= 0, 
-        stop= (int(meta["Record Length"][0])-N) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
+        stop= (int(meta["Record Length"][0])-N+1) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
 
     # # Do something
     # # <...>
@@ -141,7 +146,8 @@ def final_movement(r):
 def main():
     # print("Select Files to perform this script on.")
     # files = get_files()
-    folderpath = os.path.join(os.path.dirname(__file__),'samples')
+    # folderpath = os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)),'20220127 N_is_8'), 'Batch 1')
+    folderpath = os.path.join(os.path.dirname(__file__), 'samples')
     files = listdir(path= folderpath)
     print(f"Files selected: {files}")
     DIR_WRITE = write_directory(files)
