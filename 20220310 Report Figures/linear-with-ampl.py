@@ -34,6 +34,7 @@ from scipy import optimize
 # from scipy.signal import periodogram
 import matplotlib.pyplot as plt
 # from matplotlib.ticker import AutoMinorLocator
+import matplotlib
 
 def get_files():
     # uses tkinter to get the paths. returns all files as selected by UI
@@ -48,16 +49,17 @@ def get_files():
     return fs
 
 def write_directory(fs):
+    # modified from the usual write dir
     # yield folder to write results to.
     # ensure only 1 path. throw error if more than 1
-    dir = set(os.path.dirname(f) for f in fs)
-    if len(dir) > 1:
-        raise ValueError("Files from more than 1 path has been specified.")
-    dir = dir.pop()
+    dir = os.path.dirname(fs)
+    # if len(dir) > 1:
+    #     raise ValueError("Files from more than 1 path has been specified.")
+    # dir = dir.pop()
     # creates write_director (wd) if not already created
-    wd = dir + ' Results' # Improper
-    my_input = input(f"Results will be written to: {wd}\nAccept? [Y/N]")
-    if my_input == 'N':
+    wd = dir # Improper
+    my_input = 'Y' # input(f"Results will be written to: {wd}\nAccept? [Y/N]").upper()
+    if my_input != 'Y':
         import tkinter as tk
         from tkinter import filedialog
         wd = filedialog.askdirectory()
@@ -74,7 +76,7 @@ def drifting_sin(x, A, f, phi, m, c):
     return A * np.sin(2*pi*f*x + phi) + m*x+c
 
 # For each file in files selected
-def per_file(file, wd, gen_plot, display_plot, **kwargs):
+def per_file(enum_index, file, wd, gen_plot, display_plot, **kwargs):
     # wd is the write directory for results of this given file
     # Edit kwargs as necessary
     
@@ -86,12 +88,16 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
 
     # Edit Initialisation
     num_vars = numerical_variables_from_name(NAME)
-    SIGNAL_F = 80.0625e6*2 #Hz 
+    SIGNAL_F = 80.125e6*2 #Hz 
     SAMPLING_F = 1.0e6 #Hz
     ph_ad = phase_advance(SIGNAL_F, SAMPLING_F) # phase advance = 2*pi/N
     N, _ = freq_ratio(signal=SIGNAL_F, sample=SAMPLING_F)
     print(f"[Int Debug] {num_vars = }, {N = }")
-    _, _, _, mVpp, mirror_f = num_vars
+    _, mirror_f, mVpp  = num_vars
+    if mirror_f == 0:
+        print("Skipping 0 frequency")
+        return
+    mVpp *= 50 # dds step up before entering into pieze
 
     # Get phases over time
     meta, trace = fr.parse_and_read_oscilliscope_txt(file)
@@ -105,7 +111,18 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
     drifting_sin_bounds = ((     0,      0,  -2*pi, -np.inf, -np.inf), \
                            (np.inf, np.inf,   2*pi,  np.inf,  np.inf))
     popt, pcov = optimize.curve_fit(drifting_sin, t_axis, phases, 
-        p0= [0.05*mVpp, mirror_f, 0, 0, 0.5*(max(phases[:1000])+min(phases[:1000]))], 
+        p0= [0.05*mVpp/50, mirror_f, 0, 0, 0.5*(max(phases[:1000])+min(phases[:1000]))], 
+        bounds= drifting_sin_bounds)
+    # fittings = EPstandard.easy_read_popt_pcov(popt, pcov)
+
+    # Subtract drift for figure
+    phases -= popt[-2]*t_axis
+
+    # # Regression to obtain mirror freq
+    drifting_sin_bounds = ((     0,      0,  -2*pi, -np.inf, -np.inf), \
+                           (np.inf, np.inf,   2*pi,  np.inf,  np.inf))
+    popt, pcov = optimize.curve_fit(drifting_sin, t_axis, phases, 
+        p0= [0.05*mVpp/50, mirror_f, 0, 0, 0.5*(max(phases[:1000])+min(phases[:1000]))], 
         bounds= drifting_sin_bounds)
     fittings = EPstandard.easy_read_popt_pcov(popt, pcov)
     
@@ -113,17 +130,22 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
     value = (mVpp, popt[0], np.sqrt(pcov[0][0])) 
 
     # Draw figure
-    if gen_plot:
+    # if False:
+    if enum_index == 3 or enum_index == 8:
+    # if enum_index:
         fig, ax = plt.subplots(nrows=1, ncols=1)
         ax.plot(t_axis, phases, color = 'mediumblue')
-        ax.set_ylabel(r'$\phi$/rad', usetex= True)
+        ax.set_ylabel(r'$\phi_d$/rad', usetex= True)
         ax.set_xlabel(r'$t$/s', usetex= True)
-        plt.title(f"$f_{{Mirror}}$ = {mirror_f}Hz, Piezo Ampl = {mVpp}mVpp, \
-            \nSampling Freq =  = {SAMPLING_F/1e6:.2f}MS/s, AOM Freq = {SIGNAL_F/1e6:.4f}MHz, N = {N} \
-            \n(A, $f$, $\phi_0$, m, c) = {fittings}",
+        ax.set_xlim([0, 0.2])
+        plt.title(f"$f_{{Mirror}}$ = {mirror_f} Hz, Piezo Ampl = {mVpp/1e3} Vpp, \
+            \n $f_s$ = {SAMPLING_F/1e6:.2f} MS/s, $2\Omega$ = {SIGNAL_F/1e6:.3f}MHz, $N$ = {N} \
+            \n(A, $f$) = {fittings[:2]}",
             usetex= True )
         # powerpoint is 13.333 inches wide by 7.5 inches high
-        fig.set_size_inches(1.0*(13+1/3-1.5), 0.8*(7.5-2)) 
+        # geometry package boundary -0.875in*2 horizontally
+        # figures set to 0.85 * textwidth
+        fig.set_size_inches(0.85*(8.25-0.875*2), 2.7) 
         fig.tight_layout()
         if display_plot:
             plt.show(block= True)
@@ -132,7 +154,7 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
         try:
             print('Saving plot...')
             fig.savefig(os.path.join(wd, NAME[:-4] + 'result.png'), 
-                format= 'png')
+                format= 'png', dpi = 300, pad_inches = 0.01)
             print('Saved')
         except FileNotFoundError:
             print(f"[Error] Folder should have been created in initialisation block")
@@ -145,6 +167,8 @@ def final_movement(result, wd):
     xs = [r[0] for r in result]
     ys = [abs(r[1]) for r in result]
     yerrs = [r[2] for r in result]
+
+    xs=np.asarray(xs)/1e3 #mV to V 
 
     # Regress obtained values of fitted frequency against input frequency
     lin_bounds = ((0, -np.inf), (np.inf, np.inf))
@@ -160,19 +184,18 @@ def final_movement(result, wd):
         step = 0.005*(np.max(xs)-np.min(xs))),
         linear(xAx, *popt),
         markersize = 1)
-    plt.title(f"Regressed amplitude against mirror amplitude\n \
+    plt.title(f"Amplitude against mirror oscillation\n \
         $y=mx+c$: ($m, c$) = {fittings}")
-    ax.set_ylabel(r'$A_{Regressed}$ /Hz', usetex= True)
-    ax.set_xlabel(r'$A_{Mirror}$ /Hz', usetex= True)
+    ax.set_ylabel(r'$A_{Regressed}$ /rad', usetex= True)
+    ax.set_xlabel(r'Vpp /V', usetex= True)
 
     # Save plot
-    # powerpoint is 13.333 inches wide by 7.5 inches high
-    fig.set_size_inches(1.0*(13+1/3-1.5), 0.8*(7.5-2)) 
+    fig.set_size_inches(0.85*(8.25-0.875*2), 2.7) 
     fig.tight_layout()
     try:
         print('Saving plot...')
-        fig.savefig(os.path.join(wd, 'final_result.png'), 
-            format= 'png')
+        fig.savefig(os.path.join(wd, 'linear_with_amplitude.png'), 
+            format= 'png', dpi= 300, pad_inches = 0.01)
         print('Saved')
     except FileNotFoundError:
         print(f"[Error] Folder should have been created in initialisation block")
@@ -181,13 +204,18 @@ def final_movement(result, wd):
 
 def main():
     print("Select Files to perform this script on.")
-    files = get_files()
+    hons_folder = os.path.dirname(os.path.dirname(__file__))
+    files_folder = os.path.join(hons_folder, 
+        "20211020 Linear With Amplt and Deviation", "Batch 4")
+    files = [os.path.join(files_folder,f) for f in os.listdir(files_folder) if os.path.isfile(os.path.join(files_folder,f))]  
     print(f"Files selected: {files}")
-    DIR_WRITE = write_directory(files)
+    DIR_WRITE = write_directory(__file__)
     print(f"Results will be written to: {DIR_WRITE}")
     results = []
-    for file in files:
-        results.append(per_file(file, DIR_WRITE, True, len(files)==1))
+    matplotlib.rcParams.update({'font.size': 11})
+    for enum_index, file in enumerate(files):
+        temp_append = per_file(enum_index, file, DIR_WRITE, True, len(files)==1)
+        if temp_append != None: results.append(temp_append)
     if len(set(map(lambda x: x[0], results))) <= 1: 
         print("Insufficient x-axis to determine linear relationship.\n \
             Script has ended")
