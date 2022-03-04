@@ -62,16 +62,16 @@ def write_directory(fs):
     return wd
 
 # periodogram specific function
-# specify sharing axes
+# specify sharing axes (https://stackoverflow.com/a/51684195)
 def set_share_axes(axs, target=None, sharex=False, sharey=False):
     if target is None:
         target = axs.flat[0]
     # Manage share using grouper objects
     for ax in axs.flat:
         if sharex:
-            target._shared_x_axes.join(target, ax)
+            target._shared_axes['x'].join(target, ax)
         if sharey:
-            target._shared_y_axes.join(target, ax)
+            target._shared_axes['y'].join(target, ax)
     # Turn off x tick labels and offset text for all but the bottom row
     if sharex and axs.ndim > 1:
         for ax in axs[:-1,:].flat:
@@ -157,6 +157,7 @@ def per_file(file, wd, display_plot, **kwargs):
     print('\nSpectral Signal')
     print(f"Largest/peak frequency found at {f[np.argmax(power_den)]/1e3} kHz")
     ax.semilogy(f[0:]/1e3, power_den[0:])
+    ax.set_xscale('log')
     ax.set_ylim(min(power_den[1:])/5, max(power_den[1:])*5)
     ax.set_xlabel('frequency [kHz]')
     ax.set_ylabel('PSD [V**2/Hz]')
@@ -168,6 +169,7 @@ def per_file(file, wd, display_plot, **kwargs):
     print('\nSpectral Phase')
     print(f"Largest/peak frequency found at {f[np.argmax(Qxx_den)]/1e3} kHz")
     ax.semilogy(f[0:]/1e3, Qxx_den[0:])
+    ax.set_xscale('log')
     ax.set_ylim(min(Qxx_den[1:])/5, max(Qxx_den[1:])*5)
     ax.set_xlabel('frequency [kHz]')
     ax.set_ylabel('PSD [rad**2/Hz]')
@@ -179,6 +181,7 @@ def per_file(file, wd, display_plot, **kwargs):
     print('Spectral Amplitude')
     print(f"Largest/peak frequency found at {f[np.argmax(Pxx_den)]/1e3} kHz")
     ax.semilogy(f[1:]/1e3, Pxx_den[1:])
+    ax.set_xscale('log')
     ax.set_ylim(min(Pxx_den[1:])/5, max(Pxx_den[1:])*5)
     ax.set_xlabel('frequency [kHz]')
     ax.set_ylabel('PSD [V**2/Hz]')
@@ -189,6 +192,11 @@ def per_file(file, wd, display_plot, **kwargs):
 
     fig.suptitle(f"Sampling freq $f= ${SAMPLING_F/1e6} MHz, AOM freq = \
         {SIGNAL_F/1e6:.6f}MHz, N = {N}", usetex= True)
+    # powerpoint is 13.333 inches wide by 7.5 inches high
+    # a4 paper is 8.25 by 11.75 in
+    # geometry package boundary -0.875in*2 horizontally
+    # figures set to 0.8 * textwidth
+    # fig.set_size_inches(0.8*(8.25-0.875*2), 2) 
     fig.set_size_inches(11.75-1.5, 8.25-2 - 1)
     fig.tight_layout()
 
@@ -200,7 +208,7 @@ def per_file(file, wd, display_plot, **kwargs):
     try:
         print('Saving plot...')
         fig.savefig(os.path.join(wd, NAME[:-4] + 'result.png'), 
-            format= 'png')
+            format= 'png', dpi= 300)
         print('Saved')
     except FileNotFoundError:
         print(f"[Error] Folder should have been created in initialisation block")
