@@ -272,6 +272,7 @@ def numerical_variables_from_name(name, delimiter = '-'):
     """
     name = name[:-9] # Remove 00000.txt
     name = name.split(delimiter)
+    if name[-1] == '': name.pop() # Special case C2-text-00000.txt
 
     if delimiter == '-' and '' in name:
         # Reinsert - sign to next element in list since removed by .split
