@@ -101,7 +101,7 @@ def per_file(file, wd, display_plot, **kwargs):
 
     # Edit Initialisation
     num_vars = numerical_variables_from_name(NAME)
-    SIGNAL_F = 80.0625e6*2 #Hz 
+    SIGNAL_F = 80.125e6*2 #Hz 
     SAMPLING_F = 1.0e6 #Hz
     ph_ad = phase_advance(SIGNAL_F, SAMPLING_F) # phase advance = 2*pi/N
     N, _ = freq_ratio(signal=SIGNAL_F, sample=SAMPLING_F)
@@ -130,7 +130,7 @@ def per_file(file, wd, display_plot, **kwargs):
     except ValueError:
         dt = meta['Sample Interval'][0]
         axisT = np.fromiter([i* dt for i in range(len(signal))], 
-            dtype= np.float32, count= len(signal))
+            dtype= np.float64, count= len(signal))
         ax.plot(axisT, signal, color = 'mediumblue')
     ax.set_ylabel(r'$y(t)$/V', usetex= True)
     ax.set_xlabel(r'$t$/s', usetex= True)
@@ -157,7 +157,7 @@ def per_file(file, wd, display_plot, **kwargs):
     print('\nSpectral Signal')
     print(f"Largest/peak frequency found at {f[np.argmax(power_den)]/1e3} kHz")
     ax.semilogy(f[0:]/1e3, power_den[0:])
-    ax.set_xscale('log')
+    # ax.set_xscale('log')
     ax.set_ylim(min(power_den[1:])/5, max(power_den[1:])*5)
     ax.set_xlabel('frequency [kHz]')
     ax.set_ylabel('PSD [V**2/Hz]')
@@ -169,7 +169,7 @@ def per_file(file, wd, display_plot, **kwargs):
     print('\nSpectral Phase')
     print(f"Largest/peak frequency found at {f[np.argmax(Qxx_den)]/1e3} kHz")
     ax.semilogy(f[0:]/1e3, Qxx_den[0:])
-    ax.set_xscale('log')
+    # ax.set_xscale('log')
     ax.set_ylim(min(Qxx_den[1:])/5, max(Qxx_den[1:])*5)
     ax.set_xlabel('frequency [kHz]')
     ax.set_ylabel('PSD [rad**2/Hz]')
@@ -181,7 +181,7 @@ def per_file(file, wd, display_plot, **kwargs):
     print('Spectral Amplitude')
     print(f"Largest/peak frequency found at {f[np.argmax(Pxx_den)]/1e3} kHz")
     ax.semilogy(f[1:]/1e3, Pxx_den[1:])
-    ax.set_xscale('log')
+    # ax.set_xscale('log')
     ax.set_ylim(min(Pxx_den[1:])/5, max(Pxx_den[1:])*5)
     ax.set_xlabel('frequency [kHz]')
     ax.set_ylabel('PSD [V**2/Hz]')

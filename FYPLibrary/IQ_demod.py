@@ -178,6 +178,22 @@ def get_R_signal(signal, N, dphi):
     result = np.sqrt(np.square(Is) + np.square(Qs))
     return result
 
+def get_Is_Qs(signal, N, dphi):
+    """Gets coordiantes in IQ plane.
+    
+    Input
+    ----
+    signal (np array): 1D array of y_i over time.
+    N (int): number of samples involved in IQ valuation
+    dphi (float): expected value of advancement in phase between time 
+        intervals. obtained from phase_advance function
+    
+    Output
+    ----
+    Is, Qs (np array)
+    """
+    return _get_Is_and_Qs(signal, N, dphi)
+
 # phase plotting
 def phase_reconstruction_naive(ph, tol):
     """NAIVE phase reconstruction after arctan.
