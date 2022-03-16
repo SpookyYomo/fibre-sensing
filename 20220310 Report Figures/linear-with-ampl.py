@@ -1,7 +1,7 @@
 # This script will performt the regression over all traces opened, and 
 # perform a drifting sinusoidal fit. All the collected results are then 
 # bunched together to see if they obey a linear relationship with 
-# mirror_amplitude.
+# mirror_amplitude. The figure that we generate takes trace data from
 
 # . Honours Module Folder
 # ├ FYPLibrary
@@ -13,7 +13,6 @@
 #   └ this script(.py)
 
 # Initialiastion: Directory appending for my system. Vary the directories as necessary.
-from cmath import sqrt
 import sys, os.path
 
 # Add the FYPLibrary folder in the same level as this folder.
@@ -35,6 +34,7 @@ from scipy import optimize
 import matplotlib.pyplot as plt
 # from matplotlib.ticker import AutoMinorLocator
 import matplotlib
+import string
 
 def get_files():
     # uses tkinter to get the paths. returns all files as selected by UI
@@ -119,11 +119,11 @@ def per_file(enum_index, file, wd, gen_plot, display_plot, **kwargs):
     phases -= popt[-2]*t_axis
 
     # # Regression to obtain mirror freq
-    drifting_sin_bounds = ((     0,      0,  -2*pi, -np.inf, -np.inf), \
-                           (np.inf, np.inf,   2*pi,  np.inf,  np.inf))
-    popt, pcov = optimize.curve_fit(drifting_sin, t_axis, phases, 
-        p0= [0.05*mVpp/50, mirror_f, 0, 0, 0.5*(max(phases[:1000])+min(phases[:1000]))], 
-        bounds= drifting_sin_bounds)
+    # drifting_sin_bounds = ((     0,      0,  -2*pi, -np.inf, -np.inf), \
+    #                        (np.inf, np.inf,   2*pi,  np.inf,  np.inf))
+    # popt, pcov = optimize.curve_fit(drifting_sin, t_axis, phases, 
+    #     p0= [0.05*mVpp/50, mirror_f, 0, 0, 0.5*(max(phases[:1000])+min(phases[:1000]))], 
+    #     bounds= drifting_sin_bounds)
     fittings = EPstandard.easy_read_popt_pcov(popt, pcov)
     
     # we pass this value into main() for appending
@@ -138,14 +138,17 @@ def per_file(enum_index, file, wd, gen_plot, display_plot, **kwargs):
         ax.set_ylabel(r'$\phi_d$/rad', usetex= True)
         ax.set_xlabel(r'$t$/s', usetex= True)
         ax.set_xlim([0, 0.2])
-        plt.title(f"$f_{{Mirror}}$ = {mirror_f} Hz, Piezo Ampl = {mVpp/1e3} Vpp, \
-            \n $f_s$ = {SAMPLING_F/1e6:.2f} MS/s, $2\Omega$ = {SIGNAL_F/1e6:.3f}MHz, $N$ = {N} \
-            \n(A, $f$) = {fittings[:2]}",
-            usetex= True )
+        ax.text(-0.1, 1.1, "(" + string.ascii_lowercase[0] + ")", transform=ax.transAxes, 
+                size=11, weight='bold')
+        # plt.title(f"$f_{{Mirror}}$ = {mirror_f} Hz, Piezo Ampl = {mVpp/1e3} Vpp, \
+        #     \n $f_s$ = {SAMPLING_F/1e6:.2f} MS/s, $2\Omega$ = {SIGNAL_F/1e6:.3f}MHz, $N$ = {N} \
+        #     \n(A, $f$) = {fittings[:2]}",
+        #     usetex= True )
         # powerpoint is 13.333 inches wide by 7.5 inches high
         # geometry package boundary -0.875in*2 horizontally
         # figures set to 0.85 * textwidth
-        fig.set_size_inches(0.85*(8.25-0.875*2), 2.7) 
+        # fig.set_size_inches(0.85*(8.25-0.875*2), 2.7) 
+        fig.set_size_inches(0.65*(8.25-0.875*2), 2.275) 
         fig.tight_layout()
         if display_plot:
             plt.show(block= True)
@@ -153,7 +156,7 @@ def per_file(enum_index, file, wd, gen_plot, display_plot, **kwargs):
         # Saving figure block
         try:
             print('Saving plot...')
-            fig.savefig(os.path.join(wd, NAME[:-4] + 'result.png'), 
+            fig.savefig(os.path.join(wd, NAME[:-4] + 'result_notitle.png'), 
                 format= 'png', dpi = 300, pad_inches = 0.01)
             print('Saved')
         except FileNotFoundError:
@@ -178,23 +181,27 @@ def final_movement(result, wd):
 
     # Plot out the regressed data
     fig, ax = plt.subplots(nrows=1, ncols=1)
-    plt.grid(True, which='major', axis='both')
+    # plt.grid(True, which='major', axis='both')
     ax.errorbar(xs, ys, yerr=yerrs, fmt = 'bo', markersize = 3)
     ax.plot(xAx:= np.arange(start=np.min(xs), stop=np.max(xs), \
         step = 0.005*(np.max(xs)-np.min(xs))),
         linear(xAx, *popt),
         markersize = 1)
-    plt.title(f"Amplitude against mirror oscillation\n \
-        $y=mx+c$: ($m, c$) = {fittings}")
+    # plt.title(f"Amplitude against mirror oscillation\n \
+    #     $y=mx+c$: ($m, c$) = {fittings}")
     ax.set_ylabel(r'$A_{Regressed}$ /rad', usetex= True)
     ax.set_xlabel(r'Vpp /V', usetex= True)
+    ax.set_xlim([0, 20])
+    ax.set_ylim([0, 20])
+    ax.text(-0.1, 1.1, "(" + string.ascii_lowercase[1] + ")", transform=ax.transAxes, 
+                size=11, weight='bold')
 
     # Save plot
-    fig.set_size_inches(0.85*(8.25-0.875*2), 2.7) 
+    fig.set_size_inches(0.3*(8.25-0.875*2), 2.25) 
     fig.tight_layout()
     try:
         print('Saving plot...')
-        fig.savefig(os.path.join(wd, 'linear_with_amplitude.png'), 
+        fig.savefig(os.path.join(wd, 'linear_with_amplitude_notitle.png'), 
             format= 'png', dpi= 300, pad_inches = 0.01)
         print('Saved')
     except FileNotFoundError:
