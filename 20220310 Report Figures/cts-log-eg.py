@@ -1,12 +1,12 @@
-# Generate ball drop from 20210914 Initial Ball Drop\C2-ball-drop-00002.txt
+# Generate arbitarily sampled
 
 # . Honours Module Folder
 # ├ FYPLibrary
 # | ├ file_reading.py
 # | └ IQ_demod.py
-# ├ 20210914 Initial Ball Drop
-# | └ C2-ball-drop-00002.txt
 # └ Sub Project folder
+#   ├ traces folder
+#   | └ C1-trial-log-00061.trc
 #   └ this script(.py)
 
 # Initialiastion: Directory appending for my system. Vary the directories as necessary.
@@ -53,25 +53,30 @@ def write_directory(fs):
     return wd
 
 def main():
-    FYPLib = os.path.dirname(os.path.dirname(__file__))
-    file = os.path.join(FYPLib, 
-        "20210914 Initial Ball Drop", "C2-ball-drop-00002.txt")
+    # Step 1: Get file
+    file = os.path.join(os.path.dirname(__file__),
+        "traces", "C1-trial-log-00061.trc")
     print(f"File selected: {file}")
     wd = write_directory(__file__)
     print(f"Results will be written to: {wd}")
 
     # Edit Initialisation
-    SIGNAL_F = 80.0125e6*2 #Hz 
-    SAMPLING_F = 1.0e5 #Hz
+    SIGNAL_F = 70.625e6*2 #Hz 
+    SAMPLING_F = 1.0e7 #Hz
     ph_ad = phase_advance(SIGNAL_F, SAMPLING_F) # phase advance = 2*pi/N
     N, _ = freq_ratio(signal=SIGNAL_F, sample=SAMPLING_F)
     print(f"[Int Debug] {N = }, {ph_ad*2/np.pi = } should be 1")
 
-    readTxt = read_oscilliscope_txt(file)
-    meta, trace = parse_oscilliscope_txt(readTxt)
-    signal = signal_from_trace(trace)
+# Lecroy parser
+    time_axis, signals = parse_and_read_oscilliscope_trc(file)
+    signal = signals[0]
     phases = signal_to_phase(signal, N, ph_ad, phase_advancement_correction= False)
     phases = phase_reconstruction_2(phases, ph_ad)
+    meta =  {'Record Length': (len(signal), 'Points'), \
+        'Sample Interval': (1/SAMPLING_F, 's'), \
+        'Trigger Point': ('unknown', 'Samples'), \
+        'Trigger Time': ('unknown', 's'), \
+        'Horizontal Offset': ('unknown', 's')}
     t_axis = np.arange(start= 0, 
         stop= (int(meta["Record Length"][0])-N+1) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
 
@@ -81,10 +86,10 @@ def main():
     ax.plot(t_axis, phases, color = 'mediumblue', linewidth= 0.2)
     ax.set_ylabel(r'$\phi_d$/rad', usetex= True)
     ax.set_xlabel(r'$t$/s', usetex= True)
-    ax.set_ylim([-50, 40])
-    ax.set_xlim([3.2, 4.0])
+    # ax.set_ylim([-50, 40])
+    # ax.set_xlim([3.2, 4.0])
 
-    plt.title(f"Table tap, $f_s$ = {SAMPLING_F/1e3:.1f} kS/s, \
+    plt.title(f"$f_s$ = {SAMPLING_F/1e6:.1f} MS/s, \
         $2f_{{AOM}}$ = {SIGNAL_F/1e6:.3f} MHz, $N$ = {N}", usetex= True )
 
     # powerpoint is 13.333 inches wide by 7.5 inches high
@@ -97,7 +102,7 @@ def main():
     try:
         print('Saving plot...')
         NAME = os.path.basename(file)
-        fig.savefig(os.path.join(wd, 'ball-drop.png'), 
+        fig.savefig(os.path.join(wd, 'N_is_8_phase_20220224_1700.png'), 
             format= 'png', dpi= 300, pad_inches= 0)
         print('Saved')
     except FileNotFoundError:

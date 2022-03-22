@@ -118,6 +118,10 @@ def main():
     ax2.set_rticks([0.010, 0.02, 0.03], minor= False)
     # ax.set_theta_offset(-np.pi)
     # ax.set_thetalim(-np.pi / 1, np.pi / 1.5)
+    xT=plt.xticks()[0]
+    xL=['0',r'$\frac{\pi}{4}$',r'$\frac{\pi}{2}$',r'$\frac{3\pi}{4}$',\
+    r'$\pi$',r'$\frac{5\pi}{4}$',r'$\frac{3\pi}{2}$',r'$\frac{7\pi}{4}$']
+    plt.xticks(xT, xL)
 
     my_zip = list(zip(thetas, Rs))
     for i in range(len(my_zip)-1):
@@ -136,15 +140,15 @@ def main():
     # powerpoint is 13.333 inches wide by 7.5 inches high
     # geometry package boundary -0.875in*2 horizontally
     # figures set to 0.85 * textwidth
-    fig.set_size_inches(0.85*(8.25-0.875*2), 3.68) 
-    # fig.tight_layout()
+    fig.set_size_inches(0.85*(8.25-0.875*2), 3.60) 
+    fig.tight_layout()
 
     # plt.show(block= True)
     # # Saving figure block
     try:
         print('Saving plot...')
         NAME = os.path.basename(file)
-        fig.savefig(os.path.join(wd, NAME[:-4] + '_2pijumpIQ.png'), 
+        fig.savefig(os.path.join(wd, 'IQ_plane_' + NAME[:-4] + '_2pijumpIQ.png'), 
             format= 'png', dpi= 300, pad_inches = 0.01)
         print('Saved')
     except FileNotFoundError:

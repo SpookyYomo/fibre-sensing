@@ -256,9 +256,9 @@ class fix2pi():
             self.shift_counter = max(0, self.shift_counter-1)
         self.prevjump = sign(jump)
 
-        if self.shift_counter == 0 and self.counter % self.buflen == 0: # condition need to change
-            if 0.5*self.tol < rmsc(self.stream) < 1.5*self.tol:
-                self.tol = 0.8*self.tol + 0.2*rmsc(self.stream)
+        if self.shift_counter == 0: # condition need to change
+            # if 0.5*self.tol < rmsc(self.stream) < 1.5*self.tol:
+            #     self.tol = 0.8*self.tol + 0.2*rmsc(self.stream)
             # print(f"{self.counter = :>10}, {self.tol = :>7.4f}")
             if self.tol > np.pi:
                 print("abvc")
@@ -266,7 +266,7 @@ class fix2pi():
                 self.counter -= self.rollen
 
         # print(f"{jump_sub = }, {self.prevjump = }")
-        if self.shift_counter >= self.cutoff - self.rollen -0:
+        if self.shift_counter >= self.cutoff - self.rollen -23:
             print(f"jump detected at {self.counter:>10}")
             self.shift_counter = 0
             # implement shift

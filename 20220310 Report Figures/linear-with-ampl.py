@@ -134,7 +134,7 @@ def per_file(enum_index, file, wd, gen_plot, display_plot, **kwargs):
     if enum_index == 3 or enum_index == 8:
     # if enum_index:
         fig, ax = plt.subplots(nrows=1, ncols=1)
-        ax.plot(t_axis, phases, color = 'mediumblue')
+        ax.plot(t_axis, phases, color = 'mediumblue', linewidth= 0.1)
         ax.set_ylabel(r'$\phi_d$/rad', usetex= True)
         ax.set_xlabel(r'$t$/s', usetex= True)
         ax.set_xlim([0, 0.2])
@@ -145,10 +145,10 @@ def per_file(enum_index, file, wd, gen_plot, display_plot, **kwargs):
         #     \n(A, $f$) = {fittings[:2]}",
         #     usetex= True )
         # powerpoint is 13.333 inches wide by 7.5 inches high
-        # geometry package boundary -0.875in*2 horizontally
+        # geometry package boundary -1.0in*2 horizontally
         # figures set to 0.85 * textwidth
-        # fig.set_size_inches(0.85*(8.25-0.875*2), 2.7) 
-        fig.set_size_inches(0.65*(8.25-0.875*2), 2.275) 
+        # fig.set_size_inches(0.85*(8.25-1.0*2), 2.7) 
+        fig.set_size_inches(4, 2.25) 
         fig.tight_layout()
         if display_plot:
             plt.show(block= True)
@@ -156,8 +156,8 @@ def per_file(enum_index, file, wd, gen_plot, display_plot, **kwargs):
         # Saving figure block
         try:
             print('Saving plot...')
-            fig.savefig(os.path.join(wd, NAME[:-4] + 'result_notitle.png'), 
-                format= 'png', dpi = 300, pad_inches = 0.01)
+            fig.savefig(os.path.join(wd, 'oscillation_eg_' + NAME[:-4] + 'result_notitle.png'), 
+                format= 'png', dpi = 300, pad_inches = 0)
             print('Saved')
         except FileNotFoundError:
             print(f"[Error] Folder should have been created in initialisation block")
@@ -189,20 +189,20 @@ def final_movement(result, wd):
         markersize = 1)
     # plt.title(f"Amplitude against mirror oscillation\n \
     #     $y=mx+c$: ($m, c$) = {fittings}")
-    ax.set_ylabel(r'$A_{Regressed}$ /rad', usetex= True)
-    ax.set_xlabel(r'Vpp /V', usetex= True)
+    ax.set_ylabel(r'$A_{Regressed}$/rad', usetex= True)
+    ax.set_xlabel(r'Vpp/V', usetex= True)
     ax.set_xlim([0, 20])
     ax.set_ylim([0, 20])
     ax.text(-0.1, 1.1, "(" + string.ascii_lowercase[1] + ")", transform=ax.transAxes, 
                 size=11, weight='bold')
 
     # Save plot
-    fig.set_size_inches(0.3*(8.25-0.875*2), 2.25) 
+    fig.set_size_inches(2.1, 2.25) 
     fig.tight_layout()
     try:
         print('Saving plot...')
-        fig.savefig(os.path.join(wd, 'linear_with_amplitude_notitle.png'), 
-            format= 'png', dpi= 300, pad_inches = 0.01)
+        fig.savefig(os.path.join(wd, 'oscillation_linear_with_amplitude_notitle.png'), 
+            format= 'png', dpi= 300, pad_inches = 0)
         print('Saved')
     except FileNotFoundError:
         print(f"[Error] Folder should have been created in initialisation block")

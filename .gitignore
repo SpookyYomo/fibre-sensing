@@ -17,6 +17,7 @@ keyboard-shortcuts-windows.pdf
 20220114 Smarter Every Friday Presentation 2/*
 20220115 Presentation 2/*
 20220127 N_is_8/Reference Code/*
+20220408 Presentation 3/*
 
 # Ignore all png and txt files (i.e.: Results, Traces, and zips)
 *.7z
@@ -26,6 +27,7 @@ keyboard-shortcuts-windows.pdf
 *.html
 */__pycache__/*
 *.nb
+*.dat
 
 # Exception to allow for ReadMe.txt
 !*/ReadMe.txt
