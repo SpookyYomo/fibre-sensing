@@ -1,13 +1,14 @@
-# Base Script to edit off from. Acts on a trace file.
+# A test in the ability to read binary files.
 
 # . Honours Module Folder
 # ├ FYPLibrary
 # | ├ file_reading.py
 # | └ IQ_demod.py
-# └ Sub Project folder
-#   ├ Batch Folders
-#   | └ C1-...-000001.txt
-#   └ this script(.py)
+# └ Experiments 1 (Optional Depth)
+#   └ Sub Project folder
+#     ├ Batch Folders
+#     | └ C1-...-000001.txt
+#     └ this script(.py)
 
 # Initialiastion: Directory appending for my system. Vary the directories as necessary.
 import sys, os.path
@@ -25,7 +26,6 @@ if 'FYPLibrary' not in [os.path.basename(x) for x in sys.path]:
 # pprint(sys.path)
 
 # Import Modules
-# from os import listdir
 from file_reading import *
 from IQ_demod import *
 import numpy as np
@@ -34,6 +34,9 @@ import numpy as np
 # from scipy.signal import periodogram
 import matplotlib.pyplot as plt
 # from matplotlib.ticker import AutoMinorLocator
+
+import lecroyparser as lcp
+from time import perf_counter as pc
 
 def get_files():
     # uses tkinter to get the paths. returns all files as selected by UI
@@ -56,8 +59,8 @@ def write_directory(fs):
     dir = dir.pop()
     # creates write_director (wd) if not already created
     wd = dir + ' Results' # Improper
-    my_input = input(f"Results will be written to: {wd}\nAccept? [Y/N]")
-    if my_input == 'N':
+    my_input = 'Y' # input(f"Results will be written to: {wd}\nAccept? [Y/N]").upper()
+    if my_input != 'Y':
         import tkinter as tk
         from tkinter import filedialog
         wd = filedialog.askdirectory()
@@ -67,38 +70,54 @@ def write_directory(fs):
     return wd
 
 # Place script specific functions here
-def my_func():
-    return
+from math import log10, floor
+def round_to_1(x):
+    return round(x, -int(floor(log10(abs(x)))))
 
 # For each file in files selected
 def per_file(file, wd, gen_plot, display_plot, **kwargs):
+    # file is the full file path
     # wd is the write directory for results of this given file
     # Edit kwargs as necessary
     
     # Read and obtain trace
     NAME = os.path.basename(file)
-    if NAME[0] != 'C' and NAME[-4:] != '.txt':
+    if NAME[0] != 'C' and (NAME[-4:] != '.trc' or NAME[-4] != '.txt'):
         print(f"[Warning] Unrecognised file reached, Skipping: {NAME}\n")
         return
 
     # Edit Initialisation
-    num_vars = numerical_variables_from_name(NAME)
-    SIGNAL_F = 80.125e6*2 #Hz 
-    SAMPLING_F = 1.0e6 #Hz
+    SIGNAL_F = 80.625e6*2 #Hz 
+    SAMPLING_F = 1.0e7 #Hz
     ph_ad = phase_advance(SIGNAL_F, SAMPLING_F) # phase advance = 2*pi/N
     N, _ = freq_ratio(signal=SIGNAL_F, sample=SAMPLING_F)
-    print(f"[Int Debug] {num_vars = } {N = }")
-    
+    print(f"[Int Log]{N = }")
+    # Lecroy parser
+    time_axis, signals = parse_and_read_oscilliscope_trc(file)
+    signal = signals[0]
+    # meta, trace = parse_and_read_oscilliscope_txt(file)
+    # signal = signal_from_trace(trace)
+
     # Get phases over time
-    meta, trace = fr.parse_and_read_oscilliscope_txt(file)
-    signal = signal_from_trace(np.asarray(trace))
+
+    # meta, trace = fr.parse_and_read_oscilliscope_txt(file)
+    # [Log] meta = {'Record Length': (500002.0, 'Points'), 'Sample Interval': (1e-06, 's'), 'Trigger Point': (250000.0, 'Samples'), 'Trigger Time': (0.576651, 's'), 'Horizontal Offset': (-0.250001, 's')}
+    meta =  {'Record Length': (len(signal), 'Points'), \
+        'Sample Interval': (1/SAMPLING_F, 's'), \
+        'Trigger Point': ('unknown', 'Samples'), \
+        'Trigger Time': ('unknown', 's'), \
+        'Horizontal Offset': ('unknown', 's')}
     phases = signal_to_phase(signal, N, ph_ad, phase_advancement_correction= False)
+    tic = pc()
     phases = phase_reconstruction_2(phases, ph_ad)
+    toc = pc()
+    print(f"phase reconstruction took {toc - tic:.4}s.")
     t_axis = np.arange(start= 0, 
         stop= (int(meta["Record Length"][0])-N+1) * meta['Sample Interval'][0], step= meta['Sample Interval'][0])
 
-    # Do something
-    # <...>
+    # # Do something
+    # # <...>
+    # value = ...
 
     # Draw figure
     if gen_plot:
@@ -122,16 +141,26 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
             exit()
         plt.close()
 
+    # return value
+
+def final_movement(r):
+    # Do something with accumulated values from all traces
     return
 
 def main():
-    print("Select Files to perform this script on.")
-    files = get_files()
+    # print("Select Files to perform this script on.")
+    # files = get_files()
+    # folderpath = os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)),'20220127 N_is_8'), 'Batch 1')
+    folderpath = os.path.join(os.path.dirname(__file__), 'samples')
+    files = listdir(path= folderpath)
     print(f"Files selected: {files}")
     DIR_WRITE = write_directory(files)
     print(f"Results will be written to: {DIR_WRITE}")
+    results = []
     for file in files:
-        per_file(file, DIR_WRITE, True, False)
+        results.append(per_file(os.path.join(folderpath, file), 
+            DIR_WRITE, True, False))
+    final_movement(results)
     print("Script has ended.")
 
 if __name__ == '__main__':
