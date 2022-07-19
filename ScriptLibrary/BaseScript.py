@@ -11,7 +11,6 @@
 
 # Initialiastion: Directory appending for my system. Vary the directories as necessary.
 import sys, os.path
-<<<<<<< HEAD
 # Add the FYP folder for import
 if 'FYPLibrary' not in [os.path.basename(x) for x in sys.path]:
     cur_path = os.path.dirname(__file__)
@@ -21,12 +20,6 @@ if 'FYPLibrary' not in [os.path.basename(x) for x in sys.path]:
             raise ValueError('Recursively climbed up directory past root!')
     sys.path.append(os.path.join(cur_path, 'FYPLibrary'))
     del cur_path
-=======
-
-# Add the FYPLibrary folder in the same level as this folder.
-if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
-    sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'FYPLibrary'))
->>>>>>> cb2c45f (Remove unneccessary imports in BaseScript)
 
 # from pprint import pprint
 # pprint(sys.path)
