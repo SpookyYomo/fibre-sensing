@@ -1,6 +1,9 @@
 {
     "python.analysis.extraPaths": [
+        "/.pyenv/shims/python3",
+        "$HOME/.pyenv/versions/3.10.5/lib/python3.10/site-packages",
         "FYPLibrary"
     ],
+    "python.defaultInterpreterPath": "/.pyenv/shims/python3",
     "editor.rulers": [72, 79]
 }
