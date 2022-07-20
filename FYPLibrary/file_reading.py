@@ -4,7 +4,6 @@ This file aims to help with the reading of LeCroy output files.
 """
 
 import os, re
-from signal import signal
 
 # from numpy.core.defchararray import array
 import numpy as np
@@ -141,8 +140,8 @@ def parse_oscilliscope_txt(txtarray):
             metadata[line[0]] = tuple(line[1:3]) # key = value
             trace.append(tuple(line[3:]))
         else:
-            raise ValueError('Unrecognised data structure!')
             print(f"Error encountered on line [{txtarray.index(line)+1}]: {line}")
+            raise ValueError('Unrecognised data structure!')
 
     # trace = np.asarray(trace) # floating conversion is buggy
 

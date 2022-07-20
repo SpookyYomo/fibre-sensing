@@ -36,15 +36,21 @@ import matplotlib.pyplot as plt
 # from matplotlib.ticker import AutoMinorLocator
 
 def get_files():
-    # uses tkinter to get the paths. returns all files as selected by UI
-    # tkinter will not allow for extracting files from multiple folders
-    import tkinter as tk
-    from tkinter import filedialog
+    import sys
+    from PyQt5 import QtWidgets
 
-    root = tk.Tk()
-    root.withdraw()
-    fs = filedialog.askopenfilenames(initialdir= os.path.dirname(__file__), 
-        title="Select files")
+    class get_files(QtWidgets.QMainWindow):
+        def __init__(self):
+            super().__init__()
+            self._filename, _ = QtWidgets.QFileDialog.getOpenFileNames()
+        
+        @property
+        def filename(self):
+            return self._filename
+
+    # generates app first for window to populate
+    app = QtWidgets.QApplication(sys.argv)
+    fs = get_files().filename        
     return fs
 
 def write_directory(fs):
@@ -90,8 +96,18 @@ def per_file(file, wd, gen_plot, display_plot, **kwargs):
     print(f"[Int Debug] {num_vars = } {N = }")
     
     # Get phases over time
-    meta, trace = fr.parse_and_read_oscilliscope_txt(file)
-    signal = signal_from_trace(np.asarray(trace))
+    if file[-4:] == '.txt':
+        meta, trace = parse_and_read_oscilliscope_txt(file)
+        signal = signal_from_trace(np.asarray(trace))
+    elif file[-4:] == '.trc':
+        time, [signal,] = parse_and_read_oscilliscope_trc(file)
+        meta =  {'Record Length': (len(signal), 'Points'), \
+            'Sample Interval': (1/SAMPLING_F, 's'), \
+            'Trigger Point': ('unknown', 'Samples'), \
+            'Trigger Time': ('unknown', 's'), \
+            'Horizontal Offset': ('unknown', 's')}
+    else:
+        raise ValueError("Wrong file type passed.")
     phases = signal_to_phase(signal, N, ph_ad, phase_advancement_correction= False)
     phases = phase_reconstruction_2(phases, ph_ad)
     t_axis = np.arange(start= 0, 

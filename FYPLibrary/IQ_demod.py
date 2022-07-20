@@ -10,11 +10,9 @@ import os.path
 # from pprint import pprint
 # from matplotlib.pyplot import hist
 
-from numpy.lib.function_base import average
 if os.path.dirname(os.path.abspath('')) not in sys.path:
     sys.path.append(os.path.dirname(os.path.abspath('')))
 # pprint(sys.path)
-import file_reading as fr
 import numpy as np
 from numpy import pi as pi
 
